@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+/* Electron drag region */
+.drag-region {
+  -webkit-app-region: drag;
+}
+
+button,
+input {
+  -webkit-app-region: no-drag;
+}
+
+/* Base — não pode ser feito inline (elementos fora do React) */
+body {
+  background: #0c0e13;
+  color: #e2e8f0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  max-width: 880px;
+  margin: 0 auto;
+  background: rgba(30, 34, 42, 0.65);
+  overflow: hidden;
+}
+
+/* Ícones dos botões — pseudo-elements não suportam Tailwind inline */
+#tools button {
+  cursor: pointer;
+}
+
+#tools button:nth-child(1)::before {
+  content: "⊕";
+  font-size: 1.6rem;
+  line-height: 1;
+  display: block;
+}
+
+#tools button:nth-child(2)::before {
+  content: "💾";
+  font-size: 1.4rem;
+  line-height: 1;
+  display: block;
+}
+
+#tools button:nth-child(3)::before {
+  content: "🗑";
+  font-size: 1.4rem;
+  line-height: 1;
+  display: block;
+}
+
+/* Scrollbar customizada — sem equivalente Tailwind */
+main::-webkit-scrollbar {
+  width: 5px;
+}
+
+main::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+main::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 3px;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.3);
+}
+
+/* Estado vazio */
+#content:empty::after {
+  content: "Nenhum jogo adicionado ainda.";
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  color: #475569;
+  font-size: 0.9rem;
+  font-style: italic;
+}
