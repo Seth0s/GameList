@@ -1,63 +1,81 @@
-# Game Tracker - Zerados
+# 🎮 Game Tracker
 
-Aplicação desktop para rastrear e organizar jogos que você já zerou. Construída com Electron + React + TypeScript, oferece uma interface compacta e visual no estilo widget para manter seu histórico de jogos completos.
+Desktop app to track and manage the games you've completed. Built with Electron + React + TypeScript, featuring Steam API integration, SQLite persistence, and a modern dark UI.
 
 ## Preview
 
-A interface exibe os jogos em um grid de duas colunas, com capa, nome, nota e data de conclusão. O tema é escuro com tons de cinza e destaques em dourado.
+Each game card displays a vertical cover art with a background banner, along with name, rating, and completion date. The interface is frameless with custom window controls and a dark theme with golden accents.
 
-## Funcionalidades
+## Features
 
-- **Adicionar jogos** — nome, capa, nota e data de conclusão
-- **Salvar lista** — persistência via localStorage
-- **Modo excluir** — ativa botões de remoção nos cards
-- **Grid compacto** — visualização em duas colunas com cards horizontais
+- **Steam API Integration** — search games by name and automatically import cover art, banner, and basic info
+- **SQLite Persistence** — local database via `better-sqlite3`, data persists reliably across sessions
+- **Multi-image Cards** — vertical cover art + background banner for a rich visual experience
+- **Personal Rating** — rate each finished game from 0 to 10
+- **Delete Mode** — quickly remove games from your list
+- **Frameless Window** — custom title bar with minimize, maximize, and close controls
+- **Leaderboard** *(coming soon)* — button present in UI, functionality planned for future releases
 
 ## Tech Stack
 
-| Camada      | Tecnologia              |
+| Layer       | Technology              |
 |-------------|-------------------------|
 | Runtime     | Electron 40             |
-| Frontend    | React 18 + TypeScript   |
+| Frontend    | React 19 + TypeScript   |
 | Bundler     | Vite 7                  |
-| Estilização | Tailwind CSS 4          |
+| Styling     | Tailwind CSS 4          |
+| Database    | better-sqlite3 (SQLite) |
 | Lint        | ESLint + TS parser      |
 | Build       | electron-builder        |
+| CI/CD       | GitHub Actions          |
 
-## Estrutura do Projeto
+## Project Structure
 
 ```
+electron/
+├── main.ts             # Main process — IPC handlers, window, Steam API proxy
+├── preload.ts          # Context bridge (steamAPI, gameDB, windowAPI)
+├── database.ts         # SQLite init + CRUD operations
+└── electron-env.d.ts   # Window interface typings
+
 src/
-├── types/          # Interfaces de dados (Game)
-├── services/       # Operações puras sobre dados (CRUD, localStorage)
-├── hooks/          # Gerenciamento de state React (ponte service ↔ UI)
-├── components/     # Componentes visuais (GameCard)
-├── constant/       # Paleta de cores centralizada
-├── App.tsx         # Componente raiz — orquestra hook + UI
-├── main.tsx        # Entry point React + Electron bridge
-└── index.css       # Tailwind + estilos base
+├── types/              # Interfaces (Game, SteamGame)
+├── services/           # Pure data operations (GameService, SteamService)
+├── hooks/              # React state management (useGameList, useSteamSearch)
+├── components/         # Visual components (GameCard, ModalGame)
+├── constant/           # Centralized color palette
+├── App.tsx             # Root component — orchestrates hooks + UI
+├── main.tsx            # React entry point
+└── index.css           # Tailwind + base styles
 ```
 
-**Fluxo de dados:**
+**Data flow:**
 
 ```
-App.tsx → useGameList() → GameService
-  UI         state           dados puros
+App.tsx → useGameList()   → GameService   → IPC → SQLite
+       → useSteamSearch() → SteamService  → IPC → Steam API
 ```
 
-## Como Rodar
+## Getting Started
 
 ```bash
-# Instalar dependências
+# Install dependencies
 npm install
 
-# Modo desenvolvimento (Vite + Electron com HMR)
+# Rebuild native modules for Electron
+npx @electron/rebuild
+
+# Development mode (Vite + Electron with HMR)
 npm run dev
 
-# Build para produção
+# Production build
 npm run build
 ```
 
-## Autor
+## Download
 
-Widget feito por **@Seth0s**.
+Pre-built binaries for **Windows**, **Linux**, and **macOS** are available on the [Releases](https://github.com/Seth0s/GameList/releases) page.
+
+## Author
+
+Made by **[@Seth0s](https://github.com/Seth0s)**.
