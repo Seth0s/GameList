@@ -1,15 +1,28 @@
 // @see - https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "YourAppID",
+  "appId": "com.seth0s.game-tracker",
   "asar": true,
-  "productName": "YourAppName",
+  "productName": "Game Tracker",
+  "icon": "build/icon.png",
   "directories": {
     "output": "release/${version}"
   },
   "files": [
     "dist",
-    "dist-electron"
+    "dist-electron",
+    // Remove locales não usados (~43 MB economizados)
+    "!**/node_modules/**/*.md",
+    "!**/node_modules/**/*.ts",
+    "!**/node_modules/**/README*",
+    "!**/node_modules/**/CHANGELOG*",
+    "!**/node_modules/**/LICENSE*"
+  ],
+  // Manter apenas pt-BR e en-US (remove ~100 idiomas desnecessários)
+  "electronLanguages": ["pt-BR", "en-US"],
+  // Módulos nativos (.node) não podem ser carregados de dentro do asar
+  "asarUnpack": [
+    "node_modules/better-sqlite3/**"
   ],
   "mac": {
     "target": [

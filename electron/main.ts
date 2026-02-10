@@ -1,19 +1,63 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { getAllGames, addGame, deleteGame } from './database'
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// The built directory structure
-//
-// ├─┬─┬ dist
-// │ │ └── index.html
-// │ │
-// │ ├─┬ dist-electron
-// │ │ ├── main.js
-// │ │ └── preload.mjs
-// │
+// ─── IPC Handlers — Controles da janela ─────────────────────
+
+ipcMain.handle("win:minimize", () => BrowserWindow.getFocusedWindow()?.minimize());
+ipcMain.handle("win:maximize", () => {
+  const w = BrowserWindow.getFocusedWindow();
+  w?.isMaximized() ? w.unmaximize() : w?.maximize();
+});
+ipcMain.handle("win:close", () => BrowserWindow.getFocusedWindow()?.close());
+
+// ─── IPC Handlers — Banco de dados (SQLite) ─────────────────
+
+ipcMain.handle("db:getAll", () => getAllGames());
+ipcMain.handle("db:add", (_event, game) => addGame(game));
+ipcMain.handle("db:delete", (_event, id: string) => deleteGame(id));
+
+// ─── IPC Handlers — Steam API (Node.js — sem CORS) ──────────
+
+ipcMain.handle("steam:search", async (_event, query: string) => {
+  try {
+    const url = `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(query)}&cc=BR`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error(`[steam:search] HTTP ${response.status}`);
+      return { items: [] };
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("[steam:search] Erro:", error);
+    return { items: [] };
+  }
+});
+
+ipcMain.handle("steam:details", async (_event, appId: string) => {
+  try {
+    const url = `https://store.steampowered.com/api/appdetails?appids=${appId}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error(`[steam:details] HTTP ${response.status}`);
+      return {};
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("[steam:details] Erro:", error);
+    return {};
+  }
+});
+
+
 process.env.APP_ROOT = path.join(__dirname, '..')
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
@@ -27,7 +71,8 @@ let win: BrowserWindow | null
 
 function createWindow() {
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: path.join(VITE_DEV_SERVER_URL ? process.env.VITE_PUBLIC : RENDERER_DIST, 'icon.png'),
+    frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
     },

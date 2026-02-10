@@ -24,4 +24,18 @@ declare namespace NodeJS {
 // Used in Renderer process, expose in `preload.ts`
 interface Window {
   ipcRenderer: import('electron').IpcRenderer
+  windowAPI: {
+    minimize: () => Promise<void>
+    maximize: () => Promise<void>
+    close: () => Promise<void>
+  }
+  steamAPI: {
+    search: (query: string) => Promise<any>
+    getDetails: (appId: string) => Promise<any>
+  }
+  gameDB: {
+    getAll: () => Promise<any[]>
+    add: (game: any) => Promise<any>
+    delete: (id: string) => Promise<void>
+  }
 }

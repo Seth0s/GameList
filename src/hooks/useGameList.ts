@@ -1,37 +1,37 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Game } from "../types";
 import { GameService } from "../services/GameService";
 
 // ─── Hook: ponte entre Service e UI ─────────────────────────
-// Gerencia state React + chama o service para operar dados.
-// Retorna tudo que o componente precisa: dados + ações.
+// Gerencia state React + chama o service (async/IPC) para operar dados.
+// Cada operação persiste automaticamente no SQLite — sem botão "Salvar".
 
 export const useGameList = () => {
     const [games, setGames] = useState<Game[]>([]);
     const [isDeleteMode, setIsDeleteMode] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Ao montar, carrega os jogos salvos
-    useEffect(() => {
-        const saved = GameService.loadGames();
+    // Carrega os jogos do banco ao montar
+    const refreshGames = useCallback(async () => {
+        const saved = await GameService.loadGames();
         setGames(saved);
     }, []);
 
-    // ─── Ações ───────────────────────────────────────────────
+    useEffect(() => {
+        refreshGames();
+    }, [refreshGames]);
 
-    const addGame = (newGame: Omit<Game, "id">) => {
-        const updated = GameService.addGame(games, newGame);
-        setGames(updated);
+    // ─── Ações (async — cada uma persiste no banco) ─────────
+
+    const addGame = async (newGame: Omit<Game, "id">) => {
+        await GameService.addGame(newGame);
+        await refreshGames();
         setIsModalOpen(false);
     };
 
-    const deleteGame = (id: string) => {
-        const updated = GameService.deleteGame(games, id);
-        setGames(updated);
-    };
-
-    const saveGames = () => {
-        GameService.saveGames(games);
+    const deleteGame = async (id: string) => {
+        await GameService.deleteGame(id);
+        await refreshGames();
     };
 
     const toggleDeleteMode = () => {
@@ -42,7 +42,6 @@ export const useGameList = () => {
     const closeModal = () => setIsModalOpen(false);
 
     // ─── Retorno ─────────────────────────────────────────────
-    // Tudo que a UI precisa: dados + flags + funções de ação
 
     return {
         // Dados
@@ -53,7 +52,6 @@ export const useGameList = () => {
         // Ações
         addGame,
         deleteGame,
-        saveGames,
         toggleDeleteMode,
         openModal,
         closeModal,

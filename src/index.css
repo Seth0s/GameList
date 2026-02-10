@@ -27,30 +27,9 @@ body {
   overflow: hidden;
 }
 
-/* Ícones dos botões — pseudo-elements não suportam Tailwind inline */
+/* Botões da nav */
 #tools button {
   cursor: pointer;
-}
-
-#tools button:nth-child(1)::before {
-  content: "⊕";
-  font-size: 1.6rem;
-  line-height: 1;
-  display: block;
-}
-
-#tools button:nth-child(2)::before {
-  content: "💾";
-  font-size: 1.4rem;
-  line-height: 1;
-  display: block;
-}
-
-#tools button:nth-child(3)::before {
-  content: "🗑";
-  font-size: 1.4rem;
-  line-height: 1;
-  display: block;
 }
 
 /* Scrollbar customizada — sem equivalente Tailwind */
