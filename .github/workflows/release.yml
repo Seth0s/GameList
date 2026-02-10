@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
@@ -27,18 +30,7 @@ jobs:
       - name: Rebuild native modules for Electron
         run: npx @electron/rebuild
 
-      - name: Build app
+      - name: Build and publish
         run: npm run build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload release assets
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            release/**/*.exe
-            release/**/*.AppImage
-            release/**/*.dmg
-            release/**/*.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
