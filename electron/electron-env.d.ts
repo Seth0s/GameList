@@ -39,4 +39,9 @@ interface Window {
     add: (game: any) => Promise<any>
     delete: (id: string) => Promise<void>
   }
+  updaterAPI: {
+    onStatus: (callback: (status: string, data?: any) => void) => void
+    install: () => Promise<void>
+    check: () => Promise<void>
+  }
 }

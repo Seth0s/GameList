@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
+import { autoUpdater } from 'electron-updater'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { getAllGames, addGame, deleteGame } from './database'
@@ -119,4 +120,55 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(createWindow)
+// ─── Auto-Updater ────────────────────────────────────────────
+function setupAutoUpdater() {
+  // Não verifica updates em desenvolvimento
+  if (VITE_DEV_SERVER_URL) return;
+
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+
+  autoUpdater.on("checking-for-update", () => {
+    win?.webContents.send("updater:status", "checking");
+  });
+
+  autoUpdater.on("update-available", (info) => {
+    win?.webContents.send("updater:status", "available", info.version);
+  });
+
+  autoUpdater.on("update-not-available", () => {
+    win?.webContents.send("updater:status", "not-available");
+  });
+
+  autoUpdater.on("download-progress", (progress) => {
+    win?.webContents.send("updater:status", "downloading", progress.percent);
+  });
+
+  autoUpdater.on("update-downloaded", (info) => {
+    win?.webContents.send("updater:status", "downloaded", info.version);
+  });
+
+  autoUpdater.on("error", (err) => {
+    console.error("[AutoUpdater] Erro:", err);
+    win?.webContents.send("updater:status", "error", err.message);
+  });
+
+  // Verifica atualizações ao iniciar (aguarda 3s para a UI carregar)
+  setTimeout(() => {
+    autoUpdater.checkForUpdatesAndNotify();
+  }, 3000);
+}
+
+// IPC para o renderer controlar o updater
+ipcMain.handle("updater:install", () => {
+  autoUpdater.quitAndInstall(false, true);
+});
+
+ipcMain.handle("updater:check", () => {
+  autoUpdater.checkForUpdatesAndNotify();
+});
+
+app.whenReady().then(() => {
+  createWindow();
+  setupAutoUpdater();
+})

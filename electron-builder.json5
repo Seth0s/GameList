@@ -52,5 +52,12 @@
       "AppImage"
     ],
     "artifactName": "${productName}-Linux-${version}.${ext}"
-  }
+  },
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "Seth0s",
+      "repo": "GameList"
+    }
+  ]
 }

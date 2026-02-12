@@ -38,3 +38,11 @@ contextBridge.exposeInMainWorld("gameDB", {
   add: (game: any) => ipcRenderer.invoke("db:add", game),
   delete: (id: string) => ipcRenderer.invoke("db:delete", id),
 });
+
+contextBridge.exposeInMainWorld("updaterAPI", {
+  onStatus: (callback: (status: string, data?: any) => void) => {
+    ipcRenderer.on("updater:status", (_event, status, data) => callback(status, data));
+  },
+  install: () => ipcRenderer.invoke("updater:install"),
+  check: () => ipcRenderer.invoke("updater:check"),
+});

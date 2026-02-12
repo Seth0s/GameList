@@ -2,6 +2,7 @@ import { useState } from "react"
 import { GameCard } from "./components/GameCard"
 import { ModalGame } from "./components/ModalGame"
 import { StatsPanel } from "./components/StatsPanel"
+import { UpdateNotifier } from "./components/UpdateNotifier"
 import { colors } from "./constant/colors"
 import { useGameList } from "./hooks/useGameList"
 import { useAdaptiveTheme } from "./hooks/useAdaptiveTheme"
@@ -184,6 +185,7 @@ function App() {
         onClose={closeModal}
         onAddGame={addGame}
       />
+      <UpdateNotifier />
     </>
   )
 }
