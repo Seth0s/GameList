@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react";
-// @ts-expect-error colorthief has no type declarations
 import ColorThief from "colorthief";
 import { defaultPalette } from "../constant/colors";
 
