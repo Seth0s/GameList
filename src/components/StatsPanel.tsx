@@ -178,10 +178,11 @@ export const StatsPanel = ({ games }: StatsPanelProps) => {
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    formatter={(value: number | undefined, name: string) => {
+                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                    formatter={((value: number, name: string) => {
                                         const entry = stats.genreBreakdown.find((g) => g.name === name);
-                                        return [`${value ?? 0} (${entry?.percent ?? 0}%)`, name];
-                                    }}
+                                        return [`${value} (${entry?.percent ?? 0}%)`, name];
+                                    }) as any}
                                     contentStyle={{
                                         backgroundColor: "rgba(15, 17, 22, 0.95)",
                                         border: `1px solid var(--color-border)`,
