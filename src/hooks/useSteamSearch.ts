@@ -12,6 +12,7 @@ export const useSteamSearch = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [selectedGame, setSelectedGame] = useState<SteamGame | null>(null);
     const [searchTrigger, setSearchTrigger] = useState(0);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!query.trim()) {
@@ -40,9 +41,37 @@ export const useSteamSearch = () => {
     };
 
     const selectGame = (appId: string) => {
-        SteamService.getGameDetails(appId)
-            .then(setSelectedGame)
-            .catch(() => setSelectedGame(null));
+        // Preserva a tiny_image do search como fallback caso o CDN não tenha a capa
+        const searchResult = results.find((g) => g.id === appId);
+        const searchImage = searchResult?.image;
+        setError(null);
+
+        SteamService.getGameDetails(appId, searchImage)
+            .then((game) => {
+                if (game) {
+                    setSelectedGame(game);
+                } else {
+                    setError("Não foi possível carregar os detalhes deste jogo.");
+                    // Fallback: usa os dados básicos do search
+                    if (searchResult) {
+                        setSelectedGame({
+                            id: searchResult.id,
+                            name: searchResult.name,
+                            image: searchResult.image,
+                        });
+                    }
+                }
+            })
+            .catch(() => {
+                setError("Erro de conexão ao buscar detalhes.");
+                if (searchResult) {
+                    setSelectedGame({
+                        id: searchResult.id,
+                        name: searchResult.name,
+                        image: searchResult.image,
+                    });
+                }
+            });
     };
 
     return {
@@ -53,5 +82,6 @@ export const useSteamSearch = () => {
         triggerSearch,
         selectGame,
         selectedGame,
+        error,
     };
 };

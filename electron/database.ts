@@ -26,6 +26,17 @@ db.exec(`
   )
 `);
 
+// ─── Migrações ───────────────────────────────────────────────
+// Adiciona colunas novas sem apagar dados existentes.
+// ALTER TABLE ADD COLUMN é seguro: jogos antigos ficam com NULL.
+
+const columns = db.pragma("table_info(games)") as { name: string }[];
+const columnNames = columns.map((c) => c.name);
+
+if (!columnNames.includes("genre")) {
+  db.exec("ALTER TABLE games ADD COLUMN genre TEXT");
+}
+
 // ─── Tipos ──────────────────────────────────────────────────
 
 interface GameRow {
@@ -35,6 +46,7 @@ interface GameRow {
   bannerImage: string | null;
   rating: number;
   dateFinished: string | null;
+  genre: string | null;
 }
 
 // ─── CRUD ───────────────────────────────────────────────────
@@ -45,8 +57,8 @@ export const getAllGames = (): GameRow[] => {
 
 export const addGame = (game: GameRow): GameRow => {
   db.prepare(`
-    INSERT INTO games (id, name, image, bannerImage, rating, dateFinished)
-    VALUES (@id, @name, @image, @bannerImage, @rating, @dateFinished)
+    INSERT INTO games (id, name, image, bannerImage, rating, dateFinished, genre)
+    VALUES (@id, @name, @image, @bannerImage, @rating, @dateFinished, @genre)
   `).run(game);
   return game;
 };
@@ -62,7 +74,8 @@ export const updateGame = (game: GameRow): void => {
       image = @image,
       bannerImage = @bannerImage,
       rating = @rating,
-      dateFinished = @dateFinished
+      dateFinished = @dateFinished,
+      genre = @genre
     WHERE id = @id
   `).run(game);
 };

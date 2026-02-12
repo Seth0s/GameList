@@ -5,4 +5,5 @@ export interface Game {
     bannerImage?: string;  // banner de fundo (header.jpg)
     rating: number;
     dateFinished: string;
+    genre?: string;        // gêneros separados por vírgula (ex: "Action, Adventure")
 }

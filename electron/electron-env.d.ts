@@ -32,6 +32,7 @@ interface Window {
   steamAPI: {
     search: (query: string) => Promise<any>
     getDetails: (appId: string) => Promise<any>
+    checkImage: (url: string) => Promise<boolean>
   }
   gameDB: {
     getAll: () => Promise<any[]>

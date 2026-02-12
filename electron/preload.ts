@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld("windowAPI", {
 contextBridge.exposeInMainWorld("steamAPI", {
   search: (query: string) => ipcRenderer.invoke("steam:search", query),
   getDetails: (appId: string) => ipcRenderer.invoke("steam:details", appId),
+  checkImage: (url: string) => ipcRenderer.invoke("steam:checkImage", url),
 });
 
 contextBridge.exposeInMainWorld("gameDB", {

@@ -1,7 +1,12 @@
+import { useState } from "react"
 import { GameCard } from "./components/GameCard"
 import { ModalGame } from "./components/ModalGame"
+import { StatsPanel } from "./components/StatsPanel"
 import { colors } from "./constant/colors"
 import { useGameList } from "./hooks/useGameList"
+import { useAdaptiveTheme } from "./hooks/useAdaptiveTheme"
+
+type ActiveView = "games" | "stats"
 
 function App() {
   const {
@@ -15,9 +20,12 @@ function App() {
     deleteGame,
   } = useGameList()
 
+  const { applyTheme, activeGameId } = useAdaptiveTheme()
+  const [activeView, setActiveView] = useState<ActiveView>("games")
+
   return (
     <>
-      <header className="drag-region flex items-center justify-between px-5 py-3.5 border-b border-white/5" style={{ backgroundColor: colors.surface }}>
+      <header className="shrink-0 drag-region flex items-center justify-between px-5 py-3.5 border-b border-white/5 z-20" style={{ backgroundColor: colors.surface }}>
           <div id="title" className="flex items-center gap-2 text-xl font-bold tracking-wide" style={{ color: colors.textPrimary }}>
                <h1>🏆 Game Tracker</h1>
           </div>
@@ -52,10 +60,30 @@ function App() {
             </button>
           </div>
       </header>
-      <nav className="py-3.5 px-5 border-b border-white/4" style={{ backgroundColor: colors.surface }}>
+      <nav className="shrink-0 py-3.5 px-5 border-b border-white/4 z-20" style={{ backgroundColor: colors.surface }}>
           <div id="tools" className="flex flex-row justify-center gap-14">
-              {/* Add Game */}
-              <button onClick={openModal} className="flex flex-col items-center gap-1.5 bg-transparent border-none text-sm px-3 py-2 rounded-lg transition-colors hover:text-slate-100 hover:bg-white/5" style={{ color: colors.textSecondary }}>
+              {/* Home — volta para a lista de games */}
+              <button
+                onClick={() => setActiveView("games")}
+                className="flex flex-col items-center gap-1.5 bg-transparent border-none text-sm px-3 py-2 rounded-lg transition-colors hover:text-slate-100 hover:bg-white/5"
+                style={{ color: activeView === "games" ? colors.accent : colors.textSecondary }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                Home
+              </button>
+
+              {/* Add Game — desabilitado fora da aba Home */}
+              <button
+                onClick={openModal}
+                disabled={activeView !== "games"}
+                className={`flex flex-col items-center gap-1.5 bg-transparent border-none text-sm px-3 py-2 rounded-lg transition-colors ${
+                  activeView !== "games" ? "opacity-40 cursor-not-allowed" : "hover:text-slate-100 hover:bg-white/5"
+                }`}
+                style={{ color: colors.textSecondary }}
+              >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="16" />
@@ -64,8 +92,15 @@ function App() {
                 Add Game
               </button>
 
-              {/* Delete Mode */}
-              <button onClick={toggleDeleteMode} className="flex flex-col items-center gap-1.5 bg-transparent border-none text-sm px-3 py-2 rounded-lg transition-colors hover:text-slate-100 hover:bg-white/5" style={{ color: isDeleteMode ? colors.accent : colors.textSecondary }}>
+              {/* Delete Mode — desabilitado fora da aba Home */}
+              <button
+                onClick={toggleDeleteMode}
+                disabled={activeView !== "games"}
+                className={`flex flex-col items-center gap-1.5 bg-transparent border-none text-sm px-3 py-2 rounded-lg transition-colors ${
+                  activeView !== "games" ? "opacity-40 cursor-not-allowed" : "hover:text-slate-100 hover:bg-white/5"
+                }`}
+                style={{ color: isDeleteMode && activeView === "games" ? colors.accent : colors.textSecondary }}
+              >
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="3 6 5 6 21 6" />
                   <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
@@ -74,6 +109,20 @@ function App() {
                   <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
                 </svg>
                 Delete Mode
+              </button>
+
+              {/* Stats */}
+              <button
+                onClick={() => setActiveView("stats")}
+                className="flex flex-col items-center gap-1.5 bg-transparent border-none text-sm px-3 py-2 rounded-lg transition-colors hover:text-slate-100 hover:bg-white/5"
+                style={{ color: activeView === "stats" ? colors.accent : colors.textSecondary }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 20V10" />
+                  <path d="M12 20V4" />
+                  <path d="M6 20v-6" />
+                </svg>
+                Stats
               </button>
 
               {/* Leaderboard — em breve */}
@@ -101,19 +150,28 @@ function App() {
               </button>
           </div>
       </nav>
-      <main className="flex-1 p-4 overflow-y-auto">
-          <div id="content" className="grid grid-cols-2 gap-2.5">
-            {games.map((game) => (
-              <GameCard
-                key={game.id}
-                game={game}
-                isDeleteMode={isDeleteMode}
-                onDelete={deleteGame}
-              />
-            ))}
-          </div>
-      </main>
-      <footer className="py-3 px-5 border-t border-white/5" style={{ backgroundColor: colors.surface }}>
+
+      {/* ── Conteúdo: Games ou Stats ──────────────────────── */}
+      {activeView === "games" ? (
+        <main className="flex-1 p-4 overflow-y-auto">
+            <div id="content" className="grid grid-cols-2 gap-2.5">
+              {games.map((game) => (
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  isDeleteMode={isDeleteMode}
+                  isActive={activeGameId.current === game.id}
+                  onDelete={deleteGame}
+                  onSelect={applyTheme}
+                />
+              ))}
+            </div>
+        </main>
+      ) : (
+        <StatsPanel games={games} />
+      )}
+
+      <footer className="shrink-0 py-3 px-5 border-t border-white/5" style={{ backgroundColor: colors.surface }}>
           <div id="footer" className="flex flex-col items-center justify-center gap-1">
             <p className="text-sm font-medium" style={{ color: colors.textSecondary }}>Total games: {games.length}</p>
             <a href="https://github.com/Seth0s" target="_blank" className="text-[0.68rem]" style={{ color: colors.textDark }}>Widget made by @Seth0s</a>

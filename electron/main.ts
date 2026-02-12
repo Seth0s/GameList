@@ -57,6 +57,16 @@ ipcMain.handle("steam:details", async (_event, appId: string) => {
   }
 });
 
+// Verifica se uma imagem existe no CDN (HEAD request, sem baixar o corpo)
+ipcMain.handle("steam:checkImage", async (_event, imageUrl: string) => {
+  try {
+    const response = await fetch(imageUrl, { method: "HEAD" });
+    return response.ok;
+  } catch {
+    return false;
+  }
+});
+
 
 process.env.APP_ROOT = path.join(__dirname, '..')
 
